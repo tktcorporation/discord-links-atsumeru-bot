@@ -1,0 +1,38 @@
+name: Test
+
+on:
+  push:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  DISCORD_CMD_PREFIX: ${{ secrets.DISCORD_CMD_PREFIX }}
+  DISCORD_TOKEN: "dummy"
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install docker-compose
+        if: ${{ env.ACT }}
+        run: |
+          apt-get update && apt-get install -y docker docker-compose
+
+      - name: Build containers
+        run: docker-compose build app
+
+      - name: Test
+        run: |
+          docker-compose run app /bin/bash -c "RUST_BACKTRACE=1 cargo test"
+
