@@ -3,24 +3,9 @@ use std::env;
 use serenity::{
     async_trait,
     client::{Context, EventHandler},
-    model::{
-        channel::{
-            Message,
-        },
-        guild::Guild,
-        id::ChannelId,
-        gateway::{Activity, Ready},
-    },
+    model::{channel::Message, gateway::Ready, guild::Guild, id::ChannelId},
 };
-use songbird::{ffmpeg, input::Input};
-use std::ffi::OsStr;
-use std::path::Path;
-pub mod services;
-use crate::tts::generate_speech_file;
-use polly::model::VoiceId;
-use services::{get_handler_when_in_voice_channel, play_input};
 use tiger::digest::Digest;
-use tiger::Tiger;
 
 use crate::services::check_msg;
 pub struct Handler;
@@ -49,9 +34,12 @@ impl EventHandler for Handler {
         // let path = Path::new(root);
 
         println!("{:?}", &msg.guild(&ctx.cache).await.unwrap().channels);
-        println!("{:?}", find_channel_id_by_name(&msg.guild(&ctx.cache).await.unwrap(), "links"));
+        println!(
+            "{:?}",
+            find_channel_id_by_name(&msg.guild(&ctx.cache).await.unwrap(), "links")
+        );
 
-        if msg.content.contains("http") {    
+        if msg.content.contains("http") {
             let link = msg.content.clone();
             check_msg(
                 find_channel_id_by_name(&msg.guild(&ctx.cache).await.unwrap(), "links")
@@ -82,15 +70,11 @@ impl EventHandler for Handler {
 
 fn find_channel_id_by_name<'a>(guild: &Guild, name: &str) -> ChannelId {
     let map = guild.clone().channels;
-    let mut name_map = map.iter().map(|tuple| (tuple.0, String::from(&tuple.1.name)));
+    let mut name_map = map
+        .iter()
+        .map(|tuple| (tuple.0, String::from(&tuple.1.name)));
     let result = name_map.find_map(|(key, val)| if val == name { Some(key) } else { None });
     result.unwrap().clone()
-}
-
-async fn get_input_from_local<P: AsRef<OsStr>>(file_path: P) -> Input {
-    return ffmpeg(file_path)
-        .await
-        .expect("This might fail: handle this error!");
 }
 
 async fn is_ignore_msg(ctx: &Context, msg: &Message) -> bool {
@@ -126,46 +110,4 @@ async fn debug_print(msg: &Message, ctx: &Context) {
     // メッセージの送信
     let content = msg.content.clone();
     println!("message received: {:?}", content);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn path_exists() {
-        let root = option_env!("CARGO_MANIFEST_DIR").unwrap();
-        println!("{}", root);
-        let path = Path::new(root);
-        let file_path = path.join("sounds").join("2_23_AM_2.mp3");
-        println!("{}", file_path.display());
-        assert_eq!(true, file_path.exists());
-    }
-
-    #[tokio::test]
-    async fn create_tts_file() {
-        let root = option_env!("CARGO_MANIFEST_DIR").unwrap();
-        let path = Path::new(root);
-        let file_path = path.join("sounds").join("tts");
-        let speech_file = generate_speech_file(
-            "おはようございます".to_string(),
-            VoiceId::Mizuki,
-            file_path,
-            false,
-        )
-        .await
-        .unwrap();
-        get_input_from_local(speech_file).await;
-    }
-
-    #[test]
-    fn digest_str() {
-        let id = "99999999999999999999999999";
-        let digest = Tiger::digest(id.as_bytes());
-        let digest_str = format!("{:X}", digest);
-        assert_eq!(
-            digest_str,
-            "7EABF4E47410D6A9FCF10B802CE754E5357120F7081B840B"
-        );
-    }
 }

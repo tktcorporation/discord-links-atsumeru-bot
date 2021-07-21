@@ -2,15 +2,12 @@ use std::env;
 
 use serenity::{client::Client, framework::StandardFramework};
 
-use songbird::SerenityInit;
-
 mod handler;
 use handler::Handler;
 
 mod commands;
 use commands::GENERAL_GROUP;
 
-mod tts;
 mod services;
 
 #[tokio::main]
@@ -32,7 +29,6 @@ async fn main() {
     let mut client = Client::builder(&token)
         .event_handler(Handler)
         .framework(framework)
-        .register_songbird()
         .await
         .expect("Err creating client");
 
