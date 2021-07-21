@@ -1,14 +1,10 @@
-use std::{sync::Arc, time::Duration};
-
 use serenity::{
-    async_trait,
     client::Context,
     framework::standard::{
         macros::{command, group},
-        Args, CommandResult,
+        CommandResult,
     },
-    http::Http,
-    model::{channel::Message, misc::Mentionable, prelude::ChannelId},
+    model::{channel::Message},
 };
 
 use crate::services::check_msg;

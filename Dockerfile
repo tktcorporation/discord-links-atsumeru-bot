@@ -10,15 +10,10 @@ RUN apt-get update && \
     automake \
     libtool \
     m4 \
-    ffmpeg \
     curl \
-    python \
     git
 
 RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
-
-RUN curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl && \
-    chmod a+rx /usr/bin/youtube-dl
 
 ENV LC_ALL=C.UTF-8
 
@@ -47,19 +42,12 @@ RUN apt-get update && \
     autoconf \
     automake \
     libtool \
-    m4 \
-    ffmpeg \
     curl \
-    python \
  && apt-get -y clean \
  && rm -rf /var/lib/apt/lists/*
-
-RUN curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl && \
-    chmod a+rx /usr/bin/youtube-dl
 
 ENV LC_ALL=C.UTF-8
 
 COPY --from=build-env /target/release/discord-links-transfer-bot /bin/discord-links-transfer-bot
-COPY --from=build-env /sounds /sounds
 
 CMD [ "/bin/sh",  "-c", "discord-links-transfer-bot" ]

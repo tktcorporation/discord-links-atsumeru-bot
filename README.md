@@ -5,7 +5,6 @@
 ## Prerequirements
 
 - Docker, docker-compose
-- AWS Account
 - Discord Bot Token
 
 ## Get Started
@@ -85,11 +84,7 @@ heroku ps:scale app=1 -a <APP_NAME>
 ```
 
 ## To invite sample bot
-https://discord.com/api/oauth2/authorize?client_id=798137406946934784&permissions=2184261184&scope=bot
+
 
 ## LICENCE
 MIT
-
-### file
-
-sounds/shabeko_dayo.wav is generayted by CoeFontStudio.
