@@ -84,7 +84,7 @@ heroku ps:scale app=1 -a <APP_NAME>
 ```
 
 ## To invite sample bot
-
+https://discord.com/api/oauth2/authorize?client_id=866822680485429259&permissions=2147822672&scope=bot
 
 ## LICENCE
 MIT
