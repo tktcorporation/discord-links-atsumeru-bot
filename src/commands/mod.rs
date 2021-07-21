@@ -16,8 +16,7 @@ use songbird::{
     Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent,
 };
 
-mod services;
-use services::check_msg;
+use crate::services::check_msg;
 
 use songbird::ffmpeg;
 use std::path::Path;
@@ -32,7 +31,7 @@ pub(crate) struct General;
 async fn help(ctx: &Context, msg: &Message) -> CommandResult {
     check_msg(
         msg.channel_id
-            .say(&ctx.http, "`~join` でボイスチャットに入るよ")
+            .say(&ctx.http, "#links にリンクを転送するよ")
             .await,
     );
     Ok(())

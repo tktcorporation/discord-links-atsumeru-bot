@@ -11,6 +11,7 @@ mod commands;
 use commands::GENERAL_GROUP;
 
 mod tts;
+mod services;
 
 #[tokio::main]
 async fn main() {

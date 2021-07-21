@@ -4,7 +4,11 @@ use serenity::{
     async_trait,
     client::{Context, EventHandler},
     model::{
-        channel::Message,
+        channel::{
+            Message,
+        },
+        guild::Guild,
+        id::ChannelId,
         gateway::{Activity, Ready},
     },
 };
@@ -18,17 +22,15 @@ use services::{get_handler_when_in_voice_channel, play_input};
 use tiger::digest::Digest;
 use tiger::Tiger;
 
+use crate::services::check_msg;
 pub struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        ctx.set_activity(Activity::playing(
-            env::var("DISCORD_CMD_PREFIX").expect("Expected a command prefix in the environment")
-                + "join で呼んでね",
-        ))
-        .await;
+        // ctx.set_activity(Activity::playing())
+        // .await;
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
@@ -41,36 +43,48 @@ impl EventHandler for Handler {
             debug_print(&msg, &ctx).await;
         };
 
-        let handler_lock = get_handler_when_in_voice_channel(&ctx, &msg).await.unwrap();
+        // let handler_lock = get_handler_when_in_voice_channel(&ctx, &msg).await.unwrap();
 
-        let root = env!("CARGO_MANIFEST_DIR");
-        let path = Path::new(root);
+        // let root = env!("CARGO_MANIFEST_DIR");
+        // let path = Path::new(root);
 
-        // url に反応しないようにする
-        let text_for_speech = if msg.content.contains("http") {
-            "url".to_string()
-        } else {
-            msg.content.clone()
+        println!("{:?}", &msg.guild(&ctx.cache).await.unwrap().channels);
+        println!("{:?}", find_channel_id_by_name(&msg.guild(&ctx.cache).await.unwrap(), "links"));
+
+        if msg.content.contains("http") {    
+            let link = msg.content.clone();
+            check_msg(
+                find_channel_id_by_name(&msg.guild(&ctx.cache).await.unwrap(), "links")
+                    .say(&ctx.http, link)
+                    .await,
+            );
         };
 
-        let input = match text_for_speech.as_str() {
-            "BGM" => services::get_bgm_input().await.unwrap(),
-            _ => {
-                // 同じファイル名だと複数サーバーで利用した場合に競合しそうなので、ユニークなファイル名を割り当てる
-                let id = msg.guild_id.unwrap().0.to_string();
-                let digest = Tiger::digest(id.as_bytes());
-                let digest_str = format!("{:X}", digest);
+        // let input = match text_for_speech.as_str() {
+        //     "BGM" => services::get_bgm_input().await.unwrap(),
+        //     _ => {
+        //         // 同じファイル名だと複数サーバーで利用した場合に競合しそうなので、ユニークなファイル名を割り当てる
+        //         let id = msg.guild_id.unwrap().0.to_string();
+        //         let digest = Tiger::digest(id.as_bytes());
+        //         let digest_str = format!("{:X}", digest);
 
-                let file_path = path.join("sounds").join(digest_str);
-                let speech_file =
-                    generate_speech_file(text_for_speech, VoiceId::Mizuki, file_path, false)
-                        .await
-                        .unwrap();
-                get_input_from_local(speech_file).await
-            }
-        };
-        play_input(&handler_lock, input).await;
+        //         let file_path = path.join("sounds").join(digest_str);
+        //         let speech_file =
+        //             generate_speech_file(text_for_speech, VoiceId::Mizuki, file_path, false)
+        //                 .await
+        //                 .unwrap();
+        //         get_input_from_local(speech_file).await
+        //     }
+        // };
+        // play_input(&handler_lock, input).await;
     }
+}
+
+fn find_channel_id_by_name<'a>(guild: &Guild, name: &str) -> ChannelId {
+    let map = guild.clone().channels;
+    let mut name_map = map.iter().map(|tuple| (tuple.0, String::from(&tuple.1.name)));
+    let result = name_map.find_map(|(key, val)| if val == name { Some(key) } else { None });
+    result.unwrap().clone()
 }
 
 async fn get_input_from_local<P: AsRef<OsStr>>(file_path: P) -> Input {
@@ -93,12 +107,12 @@ async fn is_ignore_msg(ctx: &Context, msg: &Message) -> bool {
     };
 
     // voice channel にいない場合は動かさない
-    if get_handler_when_in_voice_channel(&ctx, &msg)
-        .await
-        .is_none()
-    {
-        return true;
-    };
+    // if get_handler_when_in_voice_channel(&ctx, &msg)
+    //     .await
+    //     .is_none()
+    // {
+    //     return true;
+    // };
 
     false
 }
