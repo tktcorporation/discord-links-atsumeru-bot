@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 5
+    steps:
+      - run: echo "Test was secceeded. event_name" && echo ${{ github.event_name }}
     
   dependabot:
     runs-on: ubuntu-latest
