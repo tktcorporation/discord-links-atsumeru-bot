@@ -38,13 +38,13 @@ impl EventHandler for Handler {
     }
 }
 
-fn find_channel_id_by_name<'a>(guild: &Guild, name: &str) -> ChannelId {
+fn find_channel_id_by_name(guild: &Guild, name: &str) -> ChannelId {
     let map = guild.clone().channels;
     let mut name_map = map
         .iter()
         .map(|tuple| (tuple.0, String::from(&tuple.1.name)));
     let result = name_map.find_map(|(key, val)| if val == name { Some(key) } else { None });
-    result.unwrap().clone()
+    *result.unwrap()
 }
 
 async fn is_ignore_msg(_ctx: &Context, msg: &Message) -> bool {

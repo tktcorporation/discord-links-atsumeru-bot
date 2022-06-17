@@ -4,7 +4,7 @@ use serenity::{
         macros::{command, group},
         CommandResult,
     },
-    model::{channel::Message},
+    model::channel::Message,
 };
 
 use crate::services::check_msg;
